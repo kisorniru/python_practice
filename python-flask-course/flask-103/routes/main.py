@@ -28,3 +28,10 @@ def global_500_handler(error):
         "error": "Internal Server Error",
         "message": "Something went wrong on our servers. Our development team has been notified."
     }), 500
+
+# --- ADD THIS DELIBERATE BUG ROUTE FOR TESTING ---
+@main_bp.route("/test-crash", methods=["GET"])
+def test_crash():
+    # This is mathematically impossible and will force a massive Python crash
+    broken_calculation = 10 / 0 
+    return f"The result is {broken_calculation}"
