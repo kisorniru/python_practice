@@ -8,7 +8,6 @@ class ClassTeacher(db.Model):
     
     # Relationship to SchoolClass and Teacher
     school_class = db.relationship('SchoolClass')
-    teacher = db.relationship('Teacher')
 
     # Relationship to ClassTeacher - one teacher has many classes
     teacher = db.relationship("Teacher", back_populates="classes")
