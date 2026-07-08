@@ -17,8 +17,34 @@ def index():
 
 @school_class_bp.route("/", methods=["POST"])
 def store():
-    name = request.form['name']
+    # Validation Check
+    # 1. Check if name feild exist
+    if name not in request.form:
+        return jsonify({
+            "message": "name feild is required"
+        }), 400
     
+    name = request.form['name']
+
+    # 2. Check if name is empty
+    if not name:
+        return jsonify({
+            "message": "Name cannot be empty"
+        }), 400
+    
+    # 3. Check length
+    if len(name) < 3:
+        return jsonify({'message': 'Name must be at least 3 characters'}), 400
+    if len(name) > 100:
+        return jsonify({'message': 'Name cannot exceed 100 characters'}), 400
+    
+    # 4. Check for duplicates
+    existing_class = SchoolClass.query.filter_by(name=name).first()
+    if existing_class:
+        return jsonify({
+            "message": 'School class with this name already exists'
+        }), 409
+
     new_school_class = SchoolClass(name=name)
     
     db.session.add(new_school_class)
