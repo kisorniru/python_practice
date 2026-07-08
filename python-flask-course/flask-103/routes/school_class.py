@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 from models import db, SchoolClass
+from routes.auth import admin_required
 
 # Create a Blueprint for the class_teacher routes
 school_class_bp = Blueprint("school_class", __name__)
@@ -16,10 +17,11 @@ def index():
     return jsonify(response_data), 200
 
 @school_class_bp.route("/", methods=["POST"])
+@admin_required
 def store():
     # Validation Check
     # 1. Check if name feild exist
-    if name not in request.form:
+    if 'name' not in request.form:
         return jsonify({
             "message": "name feild is required"
         }), 400
@@ -33,8 +35,8 @@ def store():
         }), 400
     
     # 3. Check length
-    if len(name) < 3:
-        return jsonify({'message': 'Name must be at least 3 characters'}), 400
+    if len(name) < 2:
+        return jsonify({'message': 'Name must be at least 2 characters'}), 400
     if len(name) > 100:
         return jsonify({'message': 'Name cannot exceed 100 characters'}), 400
     
@@ -45,7 +47,7 @@ def store():
             "message": 'School class with this name already exists'
         }), 409
 
-    new_school_class = SchoolClass(name=name)
+    new_school_class = SchoolClass(name=name, created_by=session['user_id'])
     
     db.session.add(new_school_class)
     try:
@@ -65,6 +67,7 @@ def store():
         return jsonify(response_data), 500
     
 @school_class_bp.route("/<int:id>", methods=["PUT"])
+@admin_required
 def update(id):
     school_class = SchoolClass.query.get_or_404(id)
     name = request.form['name']

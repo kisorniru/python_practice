@@ -4,6 +4,7 @@ class Teacher(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(60), nullable=False, unique=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     # Relationship to ClassTeacher - one teacher has many classes
     classes = db.relationship("ClassTeacher", back_populates="teacher")
