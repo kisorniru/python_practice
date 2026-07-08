@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 from models import db, ClassTeacher
+from routes.auth import admin_required
 
 # Create a Blueprint for the class_teacher routes
 class_teacher_bp = Blueprint("class_teacher", __name__)
@@ -20,6 +21,7 @@ def index():
     return jsonify(response_data), 200
 
 @class_teacher_bp.route("/", methods=["POST"])
+@admin_required
 def store():
     # Get the JSON data from the request
     data = request.get_json()
@@ -27,7 +29,7 @@ def store():
     teacher_id = data["teacher_id"]
 
     # Create a new ClassTeacher
-    new_class_teacher = ClassTeacher(class_id=class_id, teacher_id=teacher_id)
+    new_class_teacher = ClassTeacher(class_id=class_id, teacher_id=teacher_id, created_by=session['user_id'])
 
     db.session.add(new_class_teacher)
     try:

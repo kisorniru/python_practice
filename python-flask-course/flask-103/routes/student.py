@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 from models import db, Student, SchoolClass
+from routes.auth import login_required, admin_required
 
 # Create a Blueprint for the student routes
 student_bp = Blueprint("student", __name__)
@@ -16,12 +17,13 @@ def index():
     return jsonify(response_data), 200
 
 @student_bp.route("/", methods=["POST"])
+@login_required
 def store():
     name = request.form['name']
     email = request.form['email']
     class_id = request.form['class_id']
 
-    new_student = Student(name=name, email=email, class_id=class_id)
+    new_student = Student(name=name, email=email, class_id=class_id, created_by=session['user_id'])
     db.session.add(new_student)
 
     try:
@@ -62,6 +64,7 @@ def show(id):
         return jsonify(response_data), 404
     
 @student_bp.route("/<int:id>", methods=["PUT"])
+@admin_required
 def update(id):
     student = Student.query.get_or_404(id)
 
