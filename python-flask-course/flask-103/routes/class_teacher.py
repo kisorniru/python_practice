@@ -41,7 +41,7 @@ def store():
         }
         return jsonify(response_data), 201
     except Exception as e:
-        db.session.roolback()
+        db.session.rollback()
         response_data = {
             "message": "Error on creating class teacher",
             "error": str(e)
