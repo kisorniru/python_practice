@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 from models import db, User
+from utils import hash_password, verify_password
 
 # Create a Blueprint for the user routes
 user_bp = Blueprint("user", __name__)
@@ -8,13 +9,13 @@ user_bp = Blueprint("user", __name__)
 def register():
     # Validation Check
     # 1. Check if username feild exist
-    if username not in request.form:
+    if 'username' not in request.form:
         return jsonify({
             "message": "Username feild is required"
         }), 400
     
     # 1. Check if password feild exist
-    if password not in request.form:
+    if 'password' not in request.form:
         return jsonify({
             "message": "Password feild is required"
         }), 400
@@ -53,12 +54,12 @@ def register():
             "message": 'Username name already exists'
         }), 409
 
-    new_user = User(username=username, password=password)
+    new_user = User(username=username, password=hash_password(password))
 
     db.session.add(new_user)
 
     try:
-        db.session.commit(new_user)
+        db.session.commit()
         new_user_data = new_user.to_dict()
         response_data = {
             'message': 'New user created successfully!',
@@ -66,24 +67,24 @@ def register():
         }
         return jsonify(response_data), 201
     except Exception as e:
-        db.session.roolback()
+        db.session.rollback()
         response_data = {
             'message': 'Error creating on user',
             'error': str(e)
         }
         return jsonify(response_data), 500
-    
+
 @user_bp.route("/login", methods=["POST"])
 def login():
     # Validation Check
     # 1. Check if username feild exist
-    if username not in request.form:
+    if 'username' not in request.form:
         return jsonify({
             "message": "Username feild is required"
         }), 400
     
     # 1. Check if password feild exist
-    if password not in request.form:
+    if 'password' not in request.form:
         return jsonify({
             "message": "Password feild is required"
         }), 400
@@ -104,12 +105,23 @@ def login():
         }), 400
     
     # 4. Check user existance
-    user_exist = User.query.filter_by(username=username, password=password).first()
-    if not user_exist:
+    user_exist = User.query.filter_by(username=username).first()
+    if user_exist and verify_password(user_exist.password, password):
+        session['user_id'] = user_exist.id
+        user_data = user_exist.to_dict()
+        
         return jsonify({
-            "message": 'Username not found'
-        }), 404
+            'message': 'user found',
+            'user_data': user_data
+        }), 200
     
     return jsonify({
-        'message': 'user found'
+        "message": 'User not found'
+    }), 404
+
+@user_bp.route("/logout", methods=["POST", "GET"])
+def logout():
+    session.pop('user_id', None)
+    return jsonify({
+        "message": "Logout Successfully!"
     }), 200

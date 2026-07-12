@@ -5,6 +5,7 @@ class Student(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(60), nullable=False, unique=True)
     class_id = db.Column(db.Integer, db.ForeignKey('school_class.id'), nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     # Relationship to SchoolClass
     school_class = db.relationship('SchoolClass')
