@@ -1,3 +1,4 @@
+import numpy as np
 from flask import Flask, render_template, request, jsonify
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -66,6 +67,13 @@ def search():
     
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(all_descriptions)
+
+    # assasaa
+    descriptions = [movie['desc'] for movie in movies_database]
+    matrix = vectorizer.fit_transform(descriptions)
+
+    with open("vectors.txt", "w", encoding="utf-8") as vector_file:
+        vector_file.write(np.array2string(matrix.toarray(), separator=', '))
     
     movie_vectors = tfidf_matrix[:-1]
     query_vector = tfidf_matrix[-1]
