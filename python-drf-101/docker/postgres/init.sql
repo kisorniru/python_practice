@@ -1,0 +1,1 @@
+CREATE DATABASE python_drf_101_db;
